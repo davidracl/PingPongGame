@@ -20,15 +20,23 @@ void main( void )
 	USART_Init ( MYUBRR );
 	fdevopen(USART_Transmit, USART_Receive);
 	initPWM();
-	OLED_init();
 	
 	
-		
 	MCUCR |= (1 << SRE);
 	
 	SFIOR &= ~(111 << XMM0);
 	SFIOR |= (1 << XMM2);
 	
+	OLED_init();
+	
+	
+	volatile char *oled = (char *) 0x1000; // Start address for the ADC
+	while(1){
+		//OLED_write_command(0xff);
+		//oled[0] = 0x01;
+	}
+	
+	/*
 	volatile char *adc = (char *) 0x1400; // Start address for the ADC
 	volatile char *ext_ram = (char *) 0x1800; // Start address for the SRAM
 		
@@ -48,6 +56,6 @@ void main( void )
 			 
 	}
 	
-	
+	*/
 }
 

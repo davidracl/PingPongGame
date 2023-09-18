@@ -22,14 +22,41 @@ void OLED_init()
 	OLED_write_command(0xa4); //out follows RAM content
 	OLED_write_command(0xa6); //set normal display
 	OLED_write_command(0xaf); // display on
+	
+	OLED_write_command(0x22);
+	OLED_write_data(0x00);
+	OLED_write_data(0x00);
+	
+	OLED_write_command(0x21);
+	OLED_write_data(0x00);
+	OLED_write_data(0x00);
+	
+	OLED_write_data(0xff);
+		OLED_write_data(0xff);
+	OLED_write_data(0xff);
+	OLED_write_data(0xff);
+	OLED_write_data(0xff);
+	OLED_write_data(0xff);
+	OLED_write_data(0xff);
+	OLED_write_command(0xa4);
+
+
+
+
+	
+	
 }
 
-void OLED_write_data(char data){
+void OLED_write_data(uint8_t data){
 	volatile char *oled = (char *) 0x1200; // Start address for the ADC
-	oled[data] = 1;
+	oled[0] = data;
+	volatile uint8_t test = 0;
+	test = test + 2;
 }
 
-void OLED_write_command(char data){
+void OLED_write_command(uint8_t data){
 	volatile char *oled = (char *) 0x1000; // Start address for the ADC
 	oled[0] = data;
+	volatile uint8_t test = 0;
+	test = test + 2;
 }

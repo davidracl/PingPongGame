@@ -6,7 +6,7 @@ void OLED_home();
 void OLED_goto_line( );
 void OLED_clear_line();
 void OLED_pos();
-void OLED_write_data(char data); //volatile
-void OLED_write_command(char data); //volatile
+void OLED_write_data(uint8_t data); //volatile
+void OLED_write_command(uint8_t data); //volatile
 void OLED_print(char*);
 void OLED_set_brightness();
