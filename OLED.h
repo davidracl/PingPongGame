@@ -1,4 +1,7 @@
-#include "OLED.c"
+#pragma once
+#include <stdint.h>
+#include <avr/delay.h>
+
 
 void OLED_init(); // PDF:"OLED LY190-128064" section 9.4
 void OLED_reset();
@@ -9,4 +12,4 @@ void OLED_pos();
 void OLED_write_data(uint8_t data); //volatile
 void OLED_write_command(uint8_t data); //volatile
 void OLED_print(char*);
-void OLED_set_brightness();
+void OLED_set_brightness();void OLED_reset_cursor();void OLED_set_horizontal_mode();void OLED_write_string(char data);

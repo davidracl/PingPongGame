@@ -136,7 +136,28 @@
     </ToolchainSettings>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ADC.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="ADC.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="fonts.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="main.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="OLED.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="OLED.h">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="USART.h">
       <SubType>compile</SubType>
     </Compile>
   </ItemGroup>

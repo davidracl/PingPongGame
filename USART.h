@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <avr/io.h>
-#include "USART.c"
 
 #define FOSC 4915200// Clock Speed
 #define BAUD 9600

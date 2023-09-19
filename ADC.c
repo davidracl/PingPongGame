@@ -1,13 +1,6 @@
+#include "ADC.h"
 
-struct adc_output
-{
-	uint8_t joystick_y;
-	uint8_t joystick_x;
-	uint8_t left_slider;
-	uint8_t right_slider;
-};
-
-void adc_init()
+void adc_init(void)
 {
 	//
 	static uint8_t Configuration_Adc = 0x00;
