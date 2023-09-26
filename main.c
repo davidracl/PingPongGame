@@ -15,8 +15,8 @@
 #include "ADC.h"
 #include "SRAM.c"
 
-enum PageEnum currentSelectedPage = MainPage;
 struct ArrowPosition* ArrowPosition;
+uint8_t InterruptFlag;
 
 int main( void )
 {
@@ -31,14 +31,16 @@ int main( void )
 	
 	EMCUCR |= (1 << SRW01) | (1 << SRW00);
 	
-	SRAM_test();
-	setup_joystick();
-	
-	
+	// Setup interups
 	DDRD  = 0b11111011;   // set PD2 to input 
 	GICR |= (1<<INT0);     // Enable INT0 External Interrupt
 	MCUCR |= (1<<ISC01);   // Falling-Edge Triggered INT0
 	sei();     // Enable Interrupts	setup_joystick();
+	
+	SRAM_test();
+	setup_joystick();
+	
+	InterruptFlag = 0;
 	
 	struct joystickPosition* joystickPosition;
 	
@@ -54,23 +56,37 @@ int main( void )
 	OLED_menu(ArrowPosition);
 	ArrowPosition->row = PageStartGame;
 	ArrowPosition->collumn = MinCollum;
+	ArrowPositionNumber = PageStartGame;
 	OLED_print_arrow(ArrowPosition->collumn, ArrowPosition->row);
+	
+	uint8_t LocalInterruptFlag;
 	
 
 	while(1){
 		//adc_read();
 		// _delay_ms(100);
 		get_joystick_position(joystickPosition);
+		//_delay_us(100);
 		//printf("%d\r\n", joystickPosition->position);
+		// OLED_set_arrow_line(ArrowPosition, PageSettings);
+
+		printf("Row1: %d\r\n", ArrowPositionNumber);
 		
-		
-		/*if (joystickPosition->position == 3){ //DOWN
+		if (joystickPosition->position == 3){ //DOWN
 			OLED_set_arrow_line(ArrowPosition, PageSettings);
+			printf("Row: %d\r\n", ArrowPosition->row);
 		}
 		else if (joystickPosition->position == 2){ //UP
 			OLED_set_arrow_line(ArrowPosition, PageStartGame);
-		}*/
-		
+			printf("Row: %d\r\n", ArrowPosition->row);
+		}
+		printf("RowO: %d\r\n", ArrowPositionNumber);
+		LocalInterruptFlag = InterruptFlag;
+		if (LocalInterruptFlag){
+			printf("Interrupt: %d \r\n", ArrowPositionNumber);
+			OLED_page_selector(ArrowPosition);
+			InterruptFlag = 0;
+		}
 		
 	}
 	
@@ -118,5 +134,5 @@ int main( void )
 ISR(INT0_vect) 
 {
 	 GIFR&= ~(1<<INTF0);
-	 currentSelectedPage = OLED_page_selector(ArrowPosition);
+	 InterruptFlag = 1;
 }

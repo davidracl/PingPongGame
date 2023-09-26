@@ -2,12 +2,11 @@
 
 
 	
-	
 void adc_init()
 {
-	// 
+	//
 	static uint8_t Configuration_Adc = 0x00;
-	 
+	
 
 }
 
@@ -15,22 +14,21 @@ void initPWM() {
 	
 	// PD4 OC3A (Timer/Counter3 Output Compare A Match Output
 	
-    // Set pP as an output pin
-    DDRD |= (1 << PD4);
+	// Set pP as an output pin
+	DDRD |= (1 << PD4);
 	
 	TCCR0 = (1<<WGM00) | (1<<WGM01) | (1<<COM01) | (1<<CS00);
 
-    // Set non-inverting mode for OC3A (Clear on Compare Match)
-    // Set Fast PWM mode with TOP value at ICR3
+	// Set non-inverting mode for OC3A (Clear on Compare Match)
+	// Set Fast PWM mode with TOP value at ICR3
 	
-    TCCR3A |= (1 << WGM31) | (0 << WGM30) | (1 << COM3A1);
+	TCCR3A |= (1 << WGM31) | (0 << WGM30) | (1 << COM3A1);
 	TCCR3B |= (1 << WGM33) | (1 << WGM32) | (1 << CS30);
 	
 	ICR3 = 5;
-    OCR3A = 2;
+	OCR3A = 2;
 	
 }
-
 
 
 struct adc_output adc_read()
@@ -41,18 +39,18 @@ struct adc_output adc_read()
 	// tCONV = (9 x N x 2)/fCLK
 	// (9*8*2)/819138 = 175.79455e-6
 	_delay_us(500);
-	uint8_t joystick_y = adc[0];
 	uint8_t joystick_x = adc[0];
+	uint8_t joystick_y = adc[0];
 	uint8_t left_slider = adc[0];
 	uint8_t right_slider = adc[0];
-	printf("%02X, %02X, %02X, %02X \r\n", joystick_y, joystick_x, left_slider, right_slider);
+	// printf("%02X, %02X, %02X, %02X \r\n", joystick_y, joystick_x, left_slider, right_slider);
 	
 	//double joystick_angle = get_joystick_angle(joystick_x, joystick_y);
 	//printf("angle: %f", joystick_angle);
 	
-	 struct adc_output output = {joystick_x, joystick_y, left_slider, right_slider};
-		 
-	 return output;
+	struct adc_output output = {joystick_x, joystick_y, left_slider, right_slider};
+	
+	return output;
 	//return 0;
 	
 }
@@ -60,106 +58,70 @@ struct adc_output adc_read()
 uint8_t originJoystickPositionX = 0;
 uint8_t originJoystickPositionY = 0;
 
+
 void setup_joystick()
 {
 	struct adc_output initValues = adc_read();
 	originJoystickPositionX = initValues.joystick_x;
 	originJoystickPositionY = initValues.joystick_y;
-		
-}
-
-double get_joystick_angle(double joystick_x, double joystick_y)
-{
-	// in radians
-	return atan2(joystick_x, joystick_y);
-}
-
-double get_joystick_distance(double joystick_x, double joystick_y)
-{
-	double pow_x = pow(joystick_x, 2);
-	double pow_y = pow(joystick_y, 2);
 	
-	return sqrt(pow_x + pow_y);
 }
 
-double normalize_position(uint8_t currentValue, uint8_t centerValue, uint8_t minValue, uint8_t maxValue)
-{
-	volatile uint8_t curVa = currentValue;
-	volatile double distance =  (double)((double)curVa  - (double)centerValue);
 
-	if(distance > 0.0)
+int normalize_position(uint8_t currentValue, uint8_t centerValue, uint8_t minValue, uint8_t maxValue)
+{
+	int result;
+	
+	if (currentValue > centerValue){
+		result = 50 + ((currentValue - centerValue)*50) / (255 - centerValue);
+		return result;
+	}
+	if (currentValue < centerValue){
+		result = (currentValue * 50) / centerValue;
+		return result;
+	}
+	
+	
+	return 50;
+}
+
+
+
+get_joystick_position(struct joystickPosition* position)
+{
+	struct adc_output newValues;
+	double angle;
+	
+	newValues = adc_read();
+	
+	position->xNormalized = normalize_position(newValues.joystick_x, originJoystickPositionX, 0, 255);
+	position->yNormalized = normalize_position(newValues.joystick_y, originJoystickPositionY, 0, 255);
+
+
+	position->position = NEUTRAL;
+	
+	
+	
+	if( position->xNormalized > 75 || position->xNormalized < 25 || position->yNormalized > 75 || position->yNormalized < 25)
 	{
-		return distance / (((double)maxValue - (double)centerValue));
-	}
-	else if(distance < 0.0) {
-		return distance / (((double)centerValue - (double)minValue));
-	}
-	
-	return 0.0;
-}
-
-void get_joystick_position(struct joystickPosition* position)
-{
-		volatile struct adc_output newValues;
-		//volatile struct joystickPosition position;
-		double angle;
-		volatile double debugX;
-		volatile double debugY;
-		volatile double debugDistance;
-		do 
+		if(position->yNormalized > 50 && (position->xNormalized > 25 && position->xNormalized < 75))
 		{
-			newValues = adc_read();
-			
-			position->xNormalized = normalize_position(newValues.joystick_x, originJoystickPositionX, 0, 255);
-			position->yNormalized = normalize_position(newValues.joystick_y, originJoystickPositionY, 0, 255);
-			debugX = position->xNormalized;
-			debugY = position->yNormalized;
-	
-			position->angle = get_joystick_angle(position->xNormalized, position->yNormalized);
-			angle = position->angle;
-			position->distance = get_joystick_distance(position->xNormalized, position->yNormalized);
-
-			debugDistance = position->distance;
-			
-
-		} while (position->distance >= 1.41421356236);
-
-		position->position = NEUTRAL;
-		
-			/*LEFT,
-			RIGHT,
-			UP,
-			DOWN,
-			NEUTRAL*/
-			
-		if(position->distance > 0.2)
-		{
-			if(angle > M_PI_4 && angle < 3*M_PI_4)
-			{
-				printf("UP");
-				position->position = UP;
-			}
-			else if(angle > 3*M_PI_4 || angle < -3*M_PI_4)
-			{
-								printf("LEFt");
-
-				position->position = LEFT;
-			}
-			else if(angle > -3*M_PI_4 && angle < -M_PI_4)
-			{
-								printf("DOWN");
-
-				position->position = DOWN;
-			} else {
-								printf("RIGHT");
-
-				position->position = RIGHT;
-			}
+			position->position = UP;
 		}
-		
-		
+		else if(position->xNormalized < 50 && (position->yNormalized > 25 && position->yNormalized < 75))
+		{
+			position->position = LEFT;
+		}
+		else if(position->yNormalized < 50 && (position->xNormalized > 25 && position->xNormalized < 75))
+		{
+			position->position = DOWN;
+			} else {
+			position->position = RIGHT;
+		}
+	}
+	
+	
 }
-
 
 
 struct slidersPosition get_sliders_position()

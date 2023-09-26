@@ -186,11 +186,11 @@ void OLED_set_arrow_line(struct ArrowPosition* ArrowPosition, uint8_t arrow_row)
 	OLED_menu(ArrowPosition);
 	OLED_print_arrow(ArrowPosition->collumn, arrow_row);
 	ArrowPosition->row = arrow_row;
+	ArrowPositionNumber = arrow_row;
+	
 	
 }
 
-enum PageEnum OLED_page_selector(struct ArrowPosition* ArrowPosition){
-	printf("%u row is selected \r\n", ArrowPosition->row);
-	
-	return MainPage;
+void OLED_page_selector(struct ArrowPosition* ArrowPosition){
+	printf("%u row is selected \r\n", ArrowPositionNumber);
 }

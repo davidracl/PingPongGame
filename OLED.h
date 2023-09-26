@@ -17,6 +17,8 @@ struct ArrowPosition{
 	uint8_t collumn;
 };
 
+uint8_t ArrowPositionNumber;
+
 
 
 void OLED_init(); // PDF:"OLED LY190-128064" section 9.4
