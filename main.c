@@ -7,77 +7,70 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include <avr/io.h>
+#include <avr/interrupt.h>
+#include "helpers.h"  
 #include "USART.h"
-//#include "JOYSTICK.h"
-//#include "SLIDERS.h"
 #include "OLED.h"
 #include "ADC.h"
+#include "SRAM.c"
 
-void SRAM_test(void)
-    {
-		volatile char *ext_ram = (char *) 0x1800; // Start address for the SRAM
-        uint16_t ext_ram_size = 0x800;
-        uint16_t write_errors = 0;
-        uint16_t retrieval_errors = 0;
-        printf("Starting SRAM test...\n");
-        // rand() stores some internal state, so calling this function in a loop will
-        // yield different seeds each time (unless srand() is called before this function)
-        uint16_t seed = rand();
-        // Write phase: Immediately check that the correct value was stored
-        srand(seed);
-        for (uint16_t i = 0; i < ext_ram_size; i++) {
-            uint8_t some_value = rand();
-            ext_ram[i] = some_value;
-            uint8_t retreived_value = ext_ram[i];
-            if (retreived_value != some_value) {
-                printf("Write phase error: ext_ram[%4d] = %02X (should be %02X)\n", i, retreived_value, some_value);
-                write_errors++;
-            }
-        }
-        // Retrieval phase: Check that no values were changed during or after the write phase
-        srand(seed);
-        // reset the PRNG to the state it had before the write phase
-        for (uint16_t i = 0; i < ext_ram_size; i++) {
-            uint8_t some_value = rand();
-            uint8_t retreived_value = ext_ram[i];
-            if (retreived_value != some_value) {
-                printf("Retrieval phase error: ext_ram[%4d] = %02X (should be %02X)\n", i, retreived_value, some_value);
-                retrieval_errors++;
-            }
-        }
-        printf("SRAM test completed with \n%4d errors in write phase and \n%4d errors in retrieval phase\n\n", write_errors, retrieval_errors);
-}
+enum PageEnum currentSelectedPage = MainPage;
+struct ArrowPosition* ArrowPosition;
 
 int main( void )
 {
 	USART_Init ( MYUBRR );
 	fdevopen(USART_Transmit, USART_Receive);
 	initPWM();
-	
-	
+
 	MCUCR |= (1 << SRE);
 	
 	SFIOR &= ~(111 << XMM0);
 	SFIOR |= (1 << XMM2);
 	
 	EMCUCR |= (1 << SRW01) | (1 << SRW00);
+	
 	SRAM_test();
+	setup_joystick();
+	
+	
+	DDRD  = 0b11111011;   // set PD2 to input 
+	GICR |= (1<<INT0);     // Enable INT0 External Interrupt
+	MCUCR |= (1<<ISC01);   // Falling-Edge Triggered INT0
+	sei();     // Enable Interrupts	setup_joystick();
+	
+	struct joystickPosition* joystickPosition;
 	
 	OLED_init();
+	OLED_flush();
+	OLED_set_horizontal_mode();
+	OLED_reset_cursor();
 	
-	#define OLED_CMD_INVERT 0xA6
+	//char data[12] = "Hello world";
+	//uint32_t length = sizeof(data)/sizeof(char);
+	//OLED_write_string(&data, length);
+	
+	OLED_menu(ArrowPosition);
+	ArrowPosition->row = PageStartGame;
+	ArrowPosition->collumn = MinCollum;
+	OLED_print_arrow(ArrowPosition->collumn, ArrowPosition->row);
+	
 
-	
-	volatile char *oled_command = (char *) 0x1000; // Start address for the ADC
-	char data = "H";
-	_delay_us(100);
-	 
-		OLED_set_horizontal_mode();
-		while(1){
-			
-		OLED_write_string(data);
-		_delay_ms(20);
+	while(1){
+		//adc_read();
+		// _delay_ms(100);
+		get_joystick_position(joystickPosition);
+		//printf("%d\r\n", joystickPosition->position);
+		
+		
+		/*if (joystickPosition->position == 3){ //DOWN
+			OLED_set_arrow_line(ArrowPosition, PageSettings);
+		}
+		else if (joystickPosition->position == 2){ //UP
+			OLED_set_arrow_line(ArrowPosition, PageStartGame);
+		}*/
+		
 		
 	}
 	
@@ -121,3 +114,9 @@ int main( void )
 	*/
 }
 
+
+ISR(INT0_vect) 
+{
+	 GIFR&= ~(1<<INTF0);
+	 currentSelectedPage = OLED_page_selector(ArrowPosition);
+}
