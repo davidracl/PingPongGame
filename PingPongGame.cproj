@@ -160,6 +160,12 @@
     <Compile Include="OLED.h">
       <SubType>compile</SubType>
     </Compile>
+    <Compile Include="SUPPORT.c">
+      <SubType>compile</SubType>
+    </Compile>
+    <Compile Include="SUPPORT.h">
+      <SubType>compile</SubType>
+    </Compile>
     <Compile Include="USART.c">
       <SubType>compile</SubType>
     </Compile>

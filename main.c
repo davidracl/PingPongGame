@@ -5,37 +5,22 @@
  * Author : klevisr
  */ 
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <avr/io.h>
-#include <avr/interrupt.h>
-#include "helpers.h"  
+
 #include "USART.h"
 #include "OLED.h"
 #include "ADC.h"
-#include "SRAM.c"
+#include "SUPPORT.h"
 
-struct ArrowPosition* ArrowPosition;
+
 uint8_t InterruptFlag;
 
 int main( void )
 {
 	USART_Init ( MYUBRR );
-	fdevopen(USART_Transmit, USART_Receive);
-	initPWM();
+	PWM_init();
+	SRAM_init();
+	INTERRUPT_init();
 
-	MCUCR |= (1 << SRE);
-	
-	SFIOR &= ~(111 << XMM0);
-	SFIOR |= (1 << XMM2);
-	
-	EMCUCR |= (1 << SRW01) | (1 << SRW00);
-	
-	// Setup interups
-	DDRD  = 0b11111011;   // set PD2 to input 
-	GICR |= (1<<INT0);     // Enable INT0 External Interrupt
-	MCUCR |= (1<<ISC01);   // Falling-Edge Triggered INT0
-	sei();     // Enable Interrupts	setup_joystick();
 	
 	SRAM_test();
 	setup_joystick();
@@ -45,19 +30,16 @@ int main( void )
 	struct joystickPosition* joystickPosition;
 	
 	OLED_init();
-	OLED_flush();
+	OLED_flush(0);
 	OLED_set_horizontal_mode();
 	OLED_reset_cursor();
 	
-	//char data[12] = "Hello world";
-	//uint32_t length = sizeof(data)/sizeof(char);
-	//OLED_write_string(&data, length);
-	
-	OLED_menu(ArrowPosition);
-	ArrowPosition->row = PageStartGame;
-	ArrowPosition->collumn = MinCollum;
-	ArrowPositionNumber = PageStartGame;
-	OLED_print_arrow(ArrowPosition->collumn, ArrowPosition->row);
+	struct MenuElement* menu = OLED_menu_init();
+
+	//OLED_menu();
+	OLED_initialize_arrow_position();
+	//ArrowPositionNumber = PageStartGame;
+	//OLED_print_arrow(ArrowPosition.collumn, ArrowPosition.row);
 	
 	uint8_t LocalInterruptFlag;
 	
@@ -67,24 +49,24 @@ int main( void )
 		// _delay_ms(100);
 		get_joystick_position(joystickPosition);
 		//_delay_us(100);
-		//printf("%d\r\n", joystickPosition->position);
+		printf("%d\r\n", joystickPosition->position);
 		// OLED_set_arrow_line(ArrowPosition, PageSettings);
 
-		printf("Row1: %d\r\n", ArrowPositionNumber);
+		//printf("Row1: %d\r\n", ArrowPositionNumber);
 		
 		if (joystickPosition->position == 3){ //DOWN
-			OLED_set_arrow_line(ArrowPosition, PageSettings);
-			printf("Row: %d\r\n", ArrowPosition->row);
+			OLED_set_arrow_line(PageSettings);
+			//printf("Row: %d\r\n", ArrowPosition->row);
 		}
 		else if (joystickPosition->position == 2){ //UP
-			OLED_set_arrow_line(ArrowPosition, PageStartGame);
-			printf("Row: %d\r\n", ArrowPosition->row);
+			OLED_set_arrow_line(PageStartGame);
+			//printf("Row: %d\r\n", ArrowPosition->row);
 		}
-		printf("RowO: %d\r\n", ArrowPositionNumber);
+		//printf("RowO: %d\r\n", ArrowPositionNumber);
 		LocalInterruptFlag = InterruptFlag;
 		if (LocalInterruptFlag){
 			printf("Interrupt: %d \r\n", ArrowPositionNumber);
-			OLED_page_selector(ArrowPosition);
+			OLED_page_selector();
 			InterruptFlag = 0;
 		}
 		
