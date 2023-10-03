@@ -1,8 +1,7 @@
 #include <avr/io.h>
 #include <avr/interrupt.h>
 
-void SPI_SlaveInit();
-char SPI_SlaveReceive();
+uint8_t SPI_read();
 void SPI_MasterInit();
 void SPI_init();
-void SPI_MasterTransmit(char cData);
+void SPI_write(char cData);

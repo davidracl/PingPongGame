@@ -1,13 +1,14 @@
 #include "SPI.h"
 
 void SPI_init(){
+	SPI_MasterInit();
 	
 	SPCR &= ~(1 << CPOL);	// Select SPI mode 0
 	SPCR &= ~(1 << CPHA);
-	SPI_MasterInit();
-	//SPI_SlaveInit();
+	
 	DDRB |= (1<<PB4);
 	PORTB |= (1<<PB4);
+	
 	//setup interrupt in PD3
 	DDRD  &= ~(1 << PD3);     // set PD3 to input
 	GICR |= (1<<INT1);      // Enable INT1 External Interrupt
@@ -24,33 +25,31 @@ void SPI_init(){
 void SPI_MasterInit()
 {
 	/* Set MOSI and SCK output, all others input */
-	DDRB |= (1<<DDB5)|(1<<DDB7);
+	DDRB |= (1<<DDB4)|(1<<DDB5)|(1<<DDB7);
 	/* Enable SPI, Master, set clock rate fck/16 */
 	SPCR = (1<<SPE)|(1<<MSTR)|(1<<SPR0);
 }
-void SPI_MasterTransmit(char cData)
+
+void SPI_write(char cData)
 {
-	PORTB &= ~(1<<PB4);
 	/* Start transmission */
 	SPDR = cData;
 	
 	/* Wait for transmission complete */
 	while(!(SPSR & (1<<SPIF)))
 	;
-	PORTB |= (1<<PB4);
 }
-void SPI_SlaveInit()
+
+uint8_t SPI_read()
 {
-	/* Set MISO output, all others input */
-	DDRB = (1<<DDB6);
-	/* Enable SPI */
-	SPCR = (1<<SPE);
-}
-char SPI_SlaveReceive()
-{
+	
+	SPDR = 0xFF;
+	
 	/* Wait for reception complete */
-	while(!(SPSR & (1<<SPIF)))
-	;
+	while(!(SPSR & (1<<SPIF))) {
+	}
+	
+	
 	/* Return data register */
 	return SPDR;
 }
