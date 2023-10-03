@@ -7,3 +7,5 @@ PD4 => Clock for ADC chip (PWM)
 PD2 => Confirm button (MultiFn board)
 
 PD3 => Interrupt SPI
+
+Frequency SPI: 16 Mhz
