@@ -9,16 +9,12 @@ void SPI_init(){
 	DDRB |= (1<<PB4);
 	PORTB |= (1<<PB4);
 	
-	//setup interrupt in PD3
-	DDRD  &= ~(1 << PD3);     // set PD3 to input
-	GICR |= (1<<INT1);      // Enable INT1 External Interrupt
-	MCUCR |= (1<<ISC01);    // Falling-Edge Triggered INT1
-	sei();     // Enable Interrupts	setup_joystick();
 	
-	// Set SS low
-	// write data to SPI register (clock generator enabled)
-	// After shift one byte: SPI clock generator stops, SPIF=1
-	// If SPIE (interrupt) set in SPCR register
+	//setup interrupt in PD3
+	DDRD  &= ~(1 << PD3);		// set PD3 to input
+	GICR |= (1<<INT1);			// Enable INT1 External Interrupt
+	MCUCR |= (1<<ISC01);		// Falling-Edge Triggered INT1
+	sei();     
 	
 	
 }

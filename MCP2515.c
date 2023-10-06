@@ -47,6 +47,12 @@ void mcp2515_request_to_send(){
 	PORTB |= (1<<PB4);
 }
 
+void mcp2515_request_to_send_v2(){
+	PORTB &= ~(1<<PB4);
+	SPI_write(MCP_TXB0CTRL);
+	PORTB |= (1<<PB4);
+}
+
 void mcp2515_bit_modify(uint8_t data, uint8_t mask, uint8_t address){
 	PORTB &= ~(1<<PB4);
 	SPI_write(MCP_BITMOD);
