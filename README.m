@@ -16,4 +16,6 @@ Baudrate CAN: 250kHz
 CAN messages:
 - Joystick Position: ID 100
 
+!! When sending a message from Arduino to Node1, the ID is wrong !!
+
 !! CONNECT USB MULTIFUNCTION BOARD WITH MINI_USB CABLE !!
