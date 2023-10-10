@@ -9,3 +9,11 @@ PD2 => Confirm button (MultiFn board)
 PD3 => Interrupt SPI
 
 Frequency SPI: 16 Mhz
+
+Frequency DUO: 84 Mhz
+Baudrate CAN: 250kHz
+
+CAN messages:
+- Joystick Position: ID 100
+
+!! CONNECT USB MULTIFUNCTION BOARD WITH MINI_USB CABLE !!
