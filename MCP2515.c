@@ -13,6 +13,13 @@ void mcp2515_init()
 		printf (" MCP2515 is NOT in configuration mode after reset !\r\n");
 	}
 	
+	// Set bit rate
+	uint8_t BRP = MCP_FREQ / (2 * 16 * MCP_BAUDRATE);
+	
+	mcp2515_write(SJW4 | (BRP - 1), MCP_CNF1);
+	mcp2515_write(BTLMODE | SAMPLE_3X | ((MCP_PHASE1 - 1) << 3) | (MCP_PROPAG - 1), MCP_CNF2);
+	mcp2515_write(WAKFIL_DISABLE | (MCP_PHASE2 - 1), MCP_CNF3);
+	
 }
 
 uint8_t mcp2515_read ( uint8_t address )

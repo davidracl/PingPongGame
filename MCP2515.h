@@ -184,6 +184,12 @@ Copyright 2003 Kimberly Otten Software Consulting
 #define MCP_RXB1DLC 0x75
 #define MCP_RXB1D0 0x76
 
+#define MCP_FREQ 16000000	// 16 MHz
+#define MCP_BAUDRATE 250000	// 250 kHz
+#define MCP_PROPAG 2
+#define MCP_PHASE1 6
+#define MCP_PHASE2 7
+
 #endif
 
 #include "SPI.h"

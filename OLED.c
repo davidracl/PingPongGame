@@ -169,7 +169,7 @@ void OLED_operate_menu(uint8_t joystick_position){
 	uint8_t ArrowUp = ArrowPositionNumber - 2;
 	uint8_t ArrowDown = ArrowPositionNumber + 2;
 	if (SelectedMenu->numberElements > 0){
-		if (joystick_position == 3 && (ArrowDown/2 <= SelectedMenu->numberElements)){ //DOWN
+		if (joystick_position == 4 && (ArrowDown/2 <= SelectedMenu->numberElements)){ //DOWN
 			OLED_move_arrow(ArrowDown);
 		}
 		else if (joystick_position == 2 && (ArrowUp >= PageFirstElement)){ //UP

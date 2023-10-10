@@ -7,11 +7,9 @@
 
 
 #include "USART.h"
-#include "OLED.h"
-#include "ADC.h"
 #include "SUPPORT.h"
-#include "MCP2515.h"
-#include "CAN.h"
+#include "TRANSFER.h"
+#include "OLED.h"
 
 
 uint8_t InterruptFlag0;		// Interrupt Joystick
@@ -25,26 +23,25 @@ struct CAN_Message* received_message;
 
 int main( void )
 {
+	// Initialize everything
 	USART_Init ( MYUBRR );
 	PWM_init();
 	SRAM_init();
 	INTERRUPT_init();
-	//mcp2515_init();
-	CAN_init();
-	
-	
+	CAN_init(MODE_NORMAL);
 	SRAM_test();
 	setup_joystick();
 	OLED_init();
 	OLED_menu_init();	
 	
+	// Initialize interrupts
 	InterruptFlag0 = 0;
 	InterruptFlag1 = 0;
-	struct joystickPosition* joystickPosition;
-	static uint8_t data = 0x12;
-	uint8_t data2;
 	
-	static struct CAN_Message message = {78, {0x01, 0xA2, 0x65, 0x91, 0xE4}, 5};
+	struct joystickPosition* joystickPosition;
+	
+	// Example CAN message
+	//static struct CAN_Message message = {32, {0x07, 0xA2, 0x65, 0x91, 0xE4}, 5};
 	
 	while(1){
 		
@@ -58,19 +55,29 @@ int main( void )
 		printf("Byte: %x\r\n", byte); 
 		*/
 		
-		can_send(&message);
-		
+
+		// Interrupt CAN receive message
 		if (InterruptFlag1){
 			InterruptFlag1 = 0;
 			if (int_rxb0){
+				_delay_us(100);
 				received_message = can_receive(0);
 				printf(" Received CAN message \r\nID: %d, Data: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x \r\n", received_message->ID, received_message->data[0], received_message->data[1], received_message->data[2], received_message->data[3], received_message->data[4]);
 			}
 	
 			if (int_rxb1){
+				_delay_us(100);
 				received_message = can_receive(1);
 				printf(" Received CAN message \r\nID: %d, Data: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x \r\n", received_message->ID, received_message->data[0], received_message->data[1], received_message->data[2], received_message->data[3], received_message->data[4]);
 			}
+		}
+		
+		// Interrupt Joystick button
+		if (InterruptFlag0){
+			printf("Interrupt: %d \r\n", ArrowPositionNumber);
+			OLED_page_selector();
+			OLED_menu_select_element();
+			InterruptFlag0 = 0;
 		}
 		
 		// CAN send and receive message
@@ -80,17 +87,16 @@ int main( void )
 		printf("ID: %d, Data: 0x%x, 0x%x, 0x%x, 0x%x, 0x%x \r\n", received_message->ID, received_message->data[0], received_message->data[1], received_message->data[2], received_message->data[3], received_message->data[4]);
 		*/
 		
-		
+		// Navigate Menu
 		get_joystick_position(joystickPosition);
 		OLED_operate_menu(joystickPosition->position);
 		
-		if (InterruptFlag0){
-			printf("Interrupt: %d \r\n", ArrowPositionNumber);
-			OLED_page_selector();
-			OLED_menu_select_element();
-			InterruptFlag0 = 0;
-		}
-		_delay_us(10);
+		// Transfer Joystick Position
+		transfer_joystick_position(joystickPosition);
+		_delay_ms(1);
+		
+		
+		
 		
 	}
 	

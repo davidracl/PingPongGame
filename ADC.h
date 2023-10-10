@@ -18,11 +18,11 @@ struct adc_output
 };
 
 enum joystickPositionEnum {
-	LEFT,
+	NEUTRAL,
 	RIGHT,
 	UP,
+	LEFT,
 	DOWN,
-	NEUTRAL
 };
 
 struct joystickPosition
@@ -48,4 +48,5 @@ void setup_joystick();
 int normalize_position(uint8_t currentValue, uint8_t centerValue, uint8_t minValue, uint8_t maxValue);
 void get_joystick_position(struct joystickPosition* position);
 struct slidersPosition get_sliders_position();
+
 

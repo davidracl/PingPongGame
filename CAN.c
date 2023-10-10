@@ -1,16 +1,16 @@
 #include "CAN.h"
 
-void CAN_init(){
+void CAN_init(uint8_t mode){
 
 	mcp2515_init();
-	mcp2515_set_mode(MODE_LOOPBACK);
+	mcp2515_set_mode(mode);
 	
 	_delay_ms(1);
 
 	uint8_t value = mcp2515_read(MCP_CANSTAT);
 	
-	if ((value & MODE_MASK) != MODE_LOOPBACK) {
-		printf (" MCP2515 is NOT in loopback mode %u!\r\n", value);
+	if ((value & MODE_MASK) != mode) {
+		printf (" MCP2515 is NOT in set mode %u!\r\n", value);
 	}
 	
 	mcp2515_write(0b00000011, MCP_CANINTE);  // Activate Interrupts for receive buffers
@@ -26,10 +26,11 @@ void CAN_generate_message(uint8_t ID, uint8_t data, uint32_t length){
 
 void can_send(struct CAN_Message* can_message) {
 	// Not sure if needed 
+	/*
 	if (mcp2515_read(MCP_TXB0CTRL) && (1 << 0x03)){
 		printf("Transmit buffer is pending transmission, transmission aborted\r\n");
 		return;
-	}
+	}*/
 	
 	// Send message
 	mcp2515_write(can_message->ID / 8, MCP_TXB0SIDH); 
@@ -53,6 +54,7 @@ struct CAN_Message* can_receive(uint8_t buffer){		// Buffer number (0 or 1)
 	
 	// Buffer 0
 	if (!buffer){
+		_delay_us(1);
 		received_message.ID = mcp2515_read(MCP_RXB0SIDH) << 3; 
 		received_message.ID += mcp2515_read(MCP_RXB0SIDL) >> 5; 
 
