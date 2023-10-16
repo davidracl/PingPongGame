@@ -19,3 +19,7 @@ CAN messages:
 !! When sending a message from Arduino to Node1, the ID is wrong !!
 
 !! CONNECT USB MULTIFUNCTION BOARD WITH MINI_USB CABLE !!
+
+
+NODE2
+PWM for Servo (PC19 - pin 44): 49.7022 Hz
