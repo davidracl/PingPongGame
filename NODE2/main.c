@@ -10,17 +10,24 @@
 #include "can_controller.h"
 #include "can_interrupt.h"
 #include "uart.h"
+#include "servo.h"
 
 #define LED1 42
 #define LED2 43
 
 #define F_CPU 84000000
 
-
+int a = 0;
 
 int main ( void ) {
 	SystemInit();
 	uart_init(F_CPU, 115200);		// Initialize uast with baud rate 115200
+	servo_init();
+	servo_set_angle(180);
+	ir_init();
+	ADC->ADC_CR |= ADC_CR_START;
+	delay();
+	volatile int someValue = ir_read_value();
 	
 	// Baud rate: BRP = 20, SJW= 3, PRPAG= 1, PHASE1 = 5, PHASE2 = 6
 	// equivalent to baud rate of 250 kbit/s
@@ -37,13 +44,13 @@ int main ( void ) {
 	
 	
 	// Example message
-	struct CAN_Message message ;
+	struct CAN_Message message;
 	//struct CAN_Message receive_message0 ;
 	//struct CAN_Message receive_message1 ;
-	message . id = 3;
-	message . data_length = 3;
-	message . data[0] = 0x01;
-	message. data[1] = 0x02;
+	message.id = 3;
+	message.data_length = 3;
+	message.data[0] = 0x01;
+	message.data[1] = 0x07;
 	message.data[2] = 0x03;
 	can_send(&message, 0);
 	
@@ -78,6 +85,13 @@ int main ( void ) {
 	
 	
 	
+}
+volatile int test = 5;
+
+void delay(){
+	for (int i = 0; i < 100000; i++){
+		test = 5;
+	}
 }
 
 /*
