@@ -18,16 +18,22 @@
 #define F_CPU 84000000
 
 int a = 0;
+int adc_value;
+int TimeSinceLastScore;
+
+uint8_t FlagBallDetected;
+uint8_t FlagBallInGame;
 
 int main ( void ) {
 	SystemInit();
-	uart_init(F_CPU, 115200);		// Initialize uast with baud rate 115200
+	uart_init(F_CPU, 115200);		// Initialize uart with baud rate 115200
 	servo_init();
-	servo_set_angle(180);
+	//servo_set_angle(0);
 	ir_init();
 	ADC->ADC_CR |= ADC_CR_START;
 	delay();
 	volatile int someValue = ir_read_value();
+	TimeSinceLastScore = 0;
 	
 	// Baud rate: BRP = 20, SJW= 3, PRPAG= 1, PHASE1 = 5, PHASE2 = 6
 	// equivalent to baud rate of 250 kbit/s
@@ -58,6 +64,13 @@ int main ( void ) {
 	{
 		//can_send(&message, 0);
 		CAN0_Handler();
+		//adc_value = ir_read_value();
+		
+		// If Ball out of bounds: increase score
+		if (FlagBallDetected){
+			ir_count_score();
+			FlagBallDetected = 0;
+		}
 		
 		// Delay
 		for (int i = 0; i < 100000; i++){
@@ -80,7 +93,7 @@ int main ( void ) {
 		printf("Received message buffer 0\r\nID: %d, Data: 0x%x\r\n", receive_message0.id, receive_message0.data[0]);
 		printf("Received message buffer 1\r\nID: %d, Data: 0x%x\r\n", receive_message1.id, receive_message1.data[0]);
 		*/
-		
+	
 	}
 	
 	
@@ -93,6 +106,15 @@ void delay(){
 		test = 5;
 	}
 }
+
+volatile int lastConversion;
+
+void ADC_Handler() {
+	lastConversion = ADC->ADC_CDR[7];
+	FlagBallDetected = 1;
+	ADC->ADC_ISR;  
+}
+
 
 /*
 void can_message_send ( struct CAN_Message * msg ) {

@@ -38,18 +38,21 @@ void CAN0_Handler( void )
 		if(can_sr & CAN_SR_MB1)  //Mailbox 1 event
 		{
 			can_receive(&message, 1);
+			if (message.id == 100) move_servo(message.data[0]);
 
 		}
 		else if(can_sr & CAN_SR_MB2) //Mailbox 2 event
 		
 		{
 			can_receive(&message, 2);
+			if (message.id == 100) move_servo(message.data[0]);
 		}
 		else
 		{
 			printf("CAN0 message arrived in non-used mailbox\n\r");
 		}
-
+		
+		
 		if(DEBUG_INTERRUPT)printf("message id: %d\n\r", message.id);
 		if(DEBUG_INTERRUPT)printf("message data length: %d\n\r", message.data_length);
 		for (int i = 0; i < message.data_length; i++)

@@ -14,7 +14,8 @@ void servo_init(){
 	PWM->PWM_CLK |= PWM_CLK_DIVA(13) | PWM_CLK_PREA(1); 
 	PWM->PWM_CH_NUM[5].PWM_CMR |= PWM_CMR_CPRE_CLKA;
 	PWM->PWM_CH_NUM[5].PWM_CPRD |= MAX_DUTY_COUNT;
-	servo_set_angle(90);
+	currentAngle = 90;
+	servo_set_angle(currentAngle);
 	PWM->PWM_ENA |= PWM_ENA_CHID5;
 }
 
@@ -31,4 +32,27 @@ void servo_set_angle(int angleDeg){
 	int dutyCycle = (MAX_DUTY_COUNT / 20 * angleDeg)/MAX_ANGLE_DEG + MAX_DUTY_COUNT/20;
 	
 	PWM->PWM_CH_NUM[5].PWM_CDTY = MAX_DUTY_COUNT - dutyCycle;
+}
+
+void move_servo(char joystick_position){
+	int newAngle = currentAngle;
+	if (joystick_position == 2){ //UP
+		newAngle ++;		// increase if faster
+	} else if (joystick_position == 4){ //DOWN
+		newAngle --;
+	}
+	
+	if (newAngle != currentAngle){
+		if (newAngle < 0){
+			newAngle = 0;
+		}
+		else if (newAngle > 180){
+			newAngle = 180;
+		}
+	
+		servo_set_angle(newAngle);
+		currentAngle = newAngle;
+	}
+	printf("Current angle: %d\n\r", currentAngle);
+
 }
