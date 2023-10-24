@@ -10,3 +10,14 @@ void transfer_joystick_position(struct joystickPosition* joystickPosition){
 	
 	can_send(&joystick_message);	// send message
 }
+
+// Send touch button pressed via CAN with ID 99
+void transfer_touch_button(){
+	
+	struct CAN_Message touch_button;
+	touch_button.ID = 99;		// Touch button: ID 99
+	touch_button.data[0] = 1;
+	touch_button.length = 1;
+	
+	can_send(&touch_button);	// send message
+}

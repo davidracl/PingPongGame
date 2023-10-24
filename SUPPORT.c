@@ -10,11 +10,17 @@ void SRAM_init(){
 }
 
 void INTERRUPT_init(){
-	// Setup interrupts
+	// Setup interrupts for Joystick push button
 	DDRD  = 0b11111011;     // set PD2 to input
 	GICR |= (1<<INT0);      // Enable INT0 External Interrupt
 	MCUCR |= (1<<ISC01);    // Falling-Edge Triggered INT0
 	sei();     // Enable Interrupts	setup_joystick();
+	
+	// Interrupt left push button
+	DDRE |= (1 << PE0);     // set PE0 to input
+	GICR |= (1<<INT2);      // Enable INT2 External Interrupt
+	EMCUCR &= ~(1<<ISC2);   // Rising-Edge Triggered INT2
+	sei();					// Enable Interrupts	
 }
 
 void SRAM_test(void)

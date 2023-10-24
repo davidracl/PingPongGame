@@ -14,6 +14,7 @@
 
 uint8_t InterruptFlag0;		// Interrupt Joystick
 uint8_t InterruptFlag1;		// Interrupt CAN
+uint8_t InterruptFlag2;		// Interrupt left push button
 
 // Interrupt on receive buffer 0 and 1
 uint8_t int_rxb0;
@@ -37,6 +38,7 @@ int main( void )
 	// Initialize interrupts
 	InterruptFlag0 = 0;
 	InterruptFlag1 = 0;
+	InterruptFlag2 = 0;
 	
 	struct joystickPosition* joystickPosition;
 	
@@ -80,6 +82,13 @@ int main( void )
 			InterruptFlag0 = 0;
 		}
 		
+		// Interrupt touch button Left
+		if (InterruptFlag2){
+			printf("Interrupt: Left button pushed \r\n");
+			transfer_touch_button();
+			InterruptFlag2 = 0;
+		}
+		
 		// CAN send and receive message
 		/*
 		can_send(&message);
@@ -93,7 +102,7 @@ int main( void )
 		
 		// Transfer Joystick Position
 		transfer_joystick_position(joystickPosition);
-		_delay_ms(1);
+		_delay_ms(10);
 		
 		
 		
@@ -109,6 +118,13 @@ ISR(INT0_vect)
 	 InterruptFlag0 = 1;
 }
 
+// Push button Interrupt
+ISR(INT2_vect)
+{
+	GIFR&= ~(1<<INTF2);
+	InterruptFlag2 = 1;
+}
+
 // CAN Interrupt
 ISR(INT1_vect)
 {
@@ -122,7 +138,5 @@ ISR(INT1_vect)
 	printf("Interrupt SPI\r\n");
 	
 	// Set acceptance filters regarding identifier
-	// - RXBxCTRL.FILHIT<2:0> with RXFnSIDH, RXMnSIDH....
-	 
-	
+	// - RXBxCTRL.FILHIT<2:0> with RXFnSIDH, RXMnSIDH....
 }
