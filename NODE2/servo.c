@@ -53,6 +53,6 @@ void move_servo(char joystick_position){
 		servo_set_angle(newAngle);
 		currentAngle = newAngle;
 	}
-	printf("Current angle: %d\n\r", currentAngle);
+	//printf("Current angle: %d\n\r", currentAngle);
 
 }

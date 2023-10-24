@@ -11,6 +11,8 @@
 #include "can_interrupt.h"
 #include "uart.h"
 #include "servo.h"
+#include "motor.h"
+#include "solenoid.h"
 
 #define LED1 42
 #define LED2 43
@@ -24,12 +26,16 @@ int TimeSinceLastScore;
 uint8_t FlagBallDetected;
 uint8_t FlagBallInGame;
 
+void delay();
+
 int main ( void ) {
 	SystemInit();
 	uart_init(F_CPU, 115200);		// Initialize uart with baud rate 115200
 	servo_init();
 	//servo_set_angle(0);
 	ir_init();
+	motor_init();
+	solenoid_init();
 	ADC->ADC_CR |= ADC_CR_START;
 	delay();
 	volatile int someValue = ir_read_value();
@@ -38,6 +44,11 @@ int main ( void ) {
 	// Baud rate: BRP = 20, SJW= 3, PRPAG= 1, PHASE1 = 5, PHASE2 = 6
 	// equivalent to baud rate of 250 kbit/s
 	can_init_def_tx_rx_mb(0x00143156);
+	
+	
+	//motor_change_speed(500, 0);		// Left = 0
+	//volatile uint16_t motorValue = motor_read_encoder();
+	//printf("%u", motorValue);
 	
 	// Enable LEDs
 	PIOA->PIO_PER |= PIO_PDR_P20; //enable pin A20. PIN43
@@ -60,9 +71,17 @@ int main ( void ) {
 	message.data[2] = 0x03;
 	can_send(&message, 0);
 	
+	//PMC->PMC_PCER1 |= PMC_PCER0_PID13; // enable PIOC for encoder data read
+	//PIOC->PIO_PER |= PIO_PER_P1 | PIO_PER_P2 | PIO_PER_P3 | PIO_PER_P4 | PIO_PER_P5 | PIO_PER_P6 | PIO_PER_P7 | PIO_PER_P8; 
+	
 	while(1)
 	{
+		//printf("Data register: %d \r\n", PIOC->PIO_PDSR);
+		int16_t motorValue = motor_read_encoder();
+		pos = motor_read_encoder();
+		//printf("Motor value: %d, Pos: %d\r\n", motorValue, pos);
 		//can_send(&message, 0);
+		//someValue = ir_read_value();
 		CAN0_Handler();
 		//adc_value = ir_read_value();
 		
@@ -72,17 +91,17 @@ int main ( void ) {
 			FlagBallDetected = 0;
 		}
 		
+		
+		//volatile uint16_t motorValue = motor_read_encoder();
+		//printf("Motor value: %u\r\n", motorValue);
+		
 		// Delay
-		for (int i = 0; i < 100000; i++){
-			a ++;
-		}
+		delay();
 		/*
 		PIOA->PIO_CODR |= PIO_PDR_P20; //clear pin A20. PIN43
 		PIOA->PIO_CODR |= PIO_PDR_P19; //clear pin A19, PIN42
 		*/
-		for (int i = 0; i < 100000; i++){
-			a --;
-		}
+
 		/*
 		PIOA->PIO_SODR |= PIO_PDR_P20; //set pin A20. PIN43
 		PIOA->PIO_SODR |= PIO_PDR_P19; //set pin A19, PIN42*/
@@ -102,7 +121,7 @@ int main ( void ) {
 volatile int test = 5;
 
 void delay(){
-	for (int i = 0; i < 100000; i++){
+	for (int i = 0; i < 1000; i++){
 		test = 5;
 	}
 }
